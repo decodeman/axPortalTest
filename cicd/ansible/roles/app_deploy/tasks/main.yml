@@ -6,8 +6,7 @@
 
 - name: Copy README.md to target server
   copy:
-    src: "{{ playbook_dir }}/../../../../README.md"
+    src: "{{ playbook_dir }}/../../README.md"
     dest: "/opt/apps/{{ app_name }}/README.md"
     mode: "0644"
-  tags:
-    - deploy_readme
+
