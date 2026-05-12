@@ -1,0 +1,13 @@
+- name: Ensure application directory exists
+  file:
+    path: "/opt/apps/{{ app_name }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy README.md to target server
+  copy:
+    src: "{{ playbook_dir }}/../../../../README.md"
+    dest: "/opt/apps/{{ app_name }}/README.md"
+    mode: "0644"
+  tags:
+    - deploy_readme
