@@ -18,14 +18,11 @@ jobs:
 
     container:
       image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
-
+      options: "--add-host=code.ssnc.dev:100.100.128.20"
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Add code.ssnc.dev host mapping
-        run: |
-          echo "${{ secrets.CODE_SSNC_IP }} code.ssnc.dev" >> /etc/hosts
 
       - name: Load SSH key
         uses: webfactory/ssh-agent@v0.9.0
@@ -54,7 +51,8 @@ jobs:
 
     container:
       image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
-
+      options: "--add-host=code.ssnc.dev:100.100.128.20"
+      
     steps:
       - name: Runner not yet provisioned
         run: |
@@ -70,7 +68,8 @@ jobs:
 
     container:
       image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
-
+      options: "--add-host=code.ssnc.dev:100.100.128.20"
+      
     steps:
       - name: Runner not yet provisioned
         run: |
