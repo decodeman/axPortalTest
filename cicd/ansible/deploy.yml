@@ -1,0 +1,5 @@
+- name: Deploy axPortalTest
+  hosts: all
+  become: true
+  roles:
+    - app_deploy
