@@ -1,53 +1,78 @@
-name: deployMe test
+name: Deploy axPortalTest
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - '*-dev'
+      - '*-uat'
+      - '*-prod'
   workflow_dispatch:
 
-# permissions:
-#   contents: read
-
-# env:
-#   BUILD_CONFIGURATION: Release
-
 jobs:
-  deploy:  
+
+  deploy-dev:
+    name: Deploy DEV
+    if: endsWith(github.ref_name, '-dev')
+    environment: dev
     runs-on: [self-hosted, axcelus-portal-dev]
+
     container:
       image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
-      options: "--add-host=code.ssnc.dev:100.100.128.20"
 
     steps:
-      - name: Checkout repo (needed for cicd/ansible)
+      - name: Checkout repository
         uses: actions/checkout@v4
-    
-      - name: Prepare SSH known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -H 10.102.8.28 >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
 
-      - uses: webfactory/ssh-agent@v0.9.0
+      - name: Add code.ssnc.dev host mapping
+        run: |
+          echo "${{ secrets.CODE_SSNC_IP }} code.ssnc.dev" >> /etc/hosts
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Debug SSH key used by runner
-        run: |
-          echo "Keys loaded in ssh-agent:"
-          ssh-add -L || true
-
-      - name: Install ansible
+      - name: Install Ansible
         run: apt-get update && apt-get install -y ansible
 
-      - name: Run ansible playbook
+      - name: Deploy to DEV
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           cd cicd/ansible
-          ansible-playbook -i "10.102.8.28," -u cloud-runner deploy.yml \
-            -e "app_name=axPortalTest"
+          ansible-playbook \
+            -i "${{ secrets.TARGET_HOST }}," \
+            -u cloud-runner deploy.yml \
+            -e "app_name=axPortalTest env=dev"
 
+
+  deploy-uat:
+    name: Deploy UAT
+    if: endsWith(github.ref_name, '-uat')
+    environment: uat
+    runs-on: [self-hosted, axcelus-portal-uat]
+
+    container:
+      image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
+
+    steps:
+      - name: Runner not yet provisioned
+        run: |
+          echo "UAT runner not yet available."
+          echo "This job will work automatically once the runner is created."
+
+
+  deploy-prod:
+    name: Deploy PROD
+    if: endsWith(github.ref_name, '-prod')
+    environment: prod
+    runs-on: [self-hosted, axcelus-portal-prod]
+
+    container:
+      image: artifactory.msp.ssncad.global/devx-docker-rel-local/pipeline/gitlabci/ssc-cloud-cli:1.5
+
+    steps:
+      - name: Runner not yet provisioned
+        run: |
+          echo "PROD runner not yet available."
+          echo "This job will work automatically once the runner is created."
